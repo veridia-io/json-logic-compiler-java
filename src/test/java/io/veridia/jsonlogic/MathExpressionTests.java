@@ -1,5 +1,6 @@
 package io.veridia.jsonlogic;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -9,7 +10,7 @@ public class MathExpressionTests {
   private static final JsonLogic jsonLogic = new JsonLogic();
 
   @Test
-  public void testAdd() {
+  public void testAdd() throws JsonProcessingException {
     String json = "{\"+\":[4,2]}";
     Object result = jsonLogic.apply(json, null);
 
@@ -17,7 +18,7 @@ public class MathExpressionTests {
   }
 
   @Test
-  public void testMultiAdd() {
+  public void testMultiAdd() throws JsonProcessingException {
     String json = "{\"+\":[2,2,2,2,2]}";
     Object result = jsonLogic.apply(json, null);
 
@@ -25,12 +26,12 @@ public class MathExpressionTests {
   }
 
   @Test
-  public void testStringAdd() {
+  public void testStringAdd() throws JsonProcessingException {
     assertEquals(1.0, jsonLogic.apply("{\"+\" : [1, \"foo\"]}", null));
   }
 
   @Test
-  public void testSubtract() {
+  public void testSubtract() throws JsonProcessingException {
     String json = "{\"-\":[4,2]}";
     Object result = jsonLogic.apply(json, null);
 
@@ -38,7 +39,7 @@ public class MathExpressionTests {
   }
 
   @Test
-  public void testSingleSubtract() {
+  public void testSingleSubtract() throws JsonProcessingException {
     String json = "{\"-\": 2 }";
     Object result = jsonLogic.apply(json, null);
 
@@ -46,7 +47,7 @@ public class MathExpressionTests {
   }
 
   @Test
-  public void testSingleSubtractString() {
+  public void testSingleSubtractString() throws JsonProcessingException {
     String json = "{\"-\": \"2\" }";
     Object result = jsonLogic.apply(json, null);
 
@@ -54,7 +55,7 @@ public class MathExpressionTests {
   }
 
   @Test
-  public void testMultiply() {
+  public void testMultiply() throws JsonProcessingException {
     String json = "{\"*\":[4,2]}";
     Object result = jsonLogic.apply(json, null);
 
@@ -62,7 +63,7 @@ public class MathExpressionTests {
   }
 
   @Test
-  public void testMultiMultiply() {
+  public void testMultiMultiply() throws JsonProcessingException {
     String json = "{\"*\":[2,2,2,2,2]}";
     Object result = jsonLogic.apply(json, null);
 
@@ -70,7 +71,7 @@ public class MathExpressionTests {
   }
 
   @Test
-  public void testMultiplyWithArray() {
+  public void testMultiplyWithArray() throws JsonProcessingException {
     String json = "{\"*\":[2,[[3, 4], 5]]}";
     Object result = jsonLogic.apply(json, null);
 
@@ -78,7 +79,7 @@ public class MathExpressionTests {
   }
 
   @Test
-  public void testMultiplyWithEmptyArray() {
+  public void testMultiplyWithEmptyArray() throws JsonProcessingException {
     String json = "{\"*\":[2,[]]}";
     Object result = jsonLogic.apply(json, null);
 
@@ -86,7 +87,7 @@ public class MathExpressionTests {
   }
 
   @Test
-  public void testDivide() {
+  public void testDivide() throws JsonProcessingException {
     String json = "{\"/\":[4,2]}";
     Object result = jsonLogic.apply(json, null);
 
@@ -94,7 +95,7 @@ public class MathExpressionTests {
   }
 
   @Test
-  public void testDivideBy0() {
+  public void testDivideBy0() throws JsonProcessingException {
     String json = "{\"/\":[4,0]}";
     Object result = jsonLogic.apply(json, null);
 
@@ -102,7 +103,7 @@ public class MathExpressionTests {
   }
 
   @Test
-  public void testModulo() {
+  public void testModulo() throws JsonProcessingException {
     String json = "{\"%\": [101,2]}";
     Object result = jsonLogic.apply(json, null);
 
@@ -110,7 +111,7 @@ public class MathExpressionTests {
   }
 
   @Test
-  public void testMin() {
+  public void testMin() throws JsonProcessingException {
     String json = "{\"min\":[1,2,3]}";
     Object result = jsonLogic.apply(json, null);
 
@@ -118,7 +119,7 @@ public class MathExpressionTests {
   }
 
   @Test
-  public void testMax() {
+  public void testMax() throws JsonProcessingException {
     String json = "{\"max\":[1,2,3]}";
     Object result = jsonLogic.apply(json, null);
 
@@ -126,7 +127,7 @@ public class MathExpressionTests {
   }
 
   @Test
-  public void testDivideSingleNumber() {
+  public void testDivideSingleNumber() throws JsonProcessingException {
     assertEquals(null, jsonLogic.apply("{\"/\": [0]}", null));
   }
 }

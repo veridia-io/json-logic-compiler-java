@@ -1,5 +1,6 @@
 package io.veridia.jsonlogic;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -8,7 +9,7 @@ import java.util.Map;
 
 public class NumberTests {
   @Test
-  public void testConvertAllNumericInputToDouble() {
+  public void testConvertAllNumericInputToDouble() throws JsonProcessingException {
     JsonLogic jsonLogic = new JsonLogic();
     Map<String, Number> numbers = new HashMap<String, Number>() {{
       put("double", 1D);

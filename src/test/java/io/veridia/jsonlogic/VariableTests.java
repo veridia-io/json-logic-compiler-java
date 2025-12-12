@@ -1,5 +1,6 @@
 package io.veridia.jsonlogic;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -17,12 +18,12 @@ public class VariableTests {
   private static final JsonLogic jsonLogic = new JsonLogic();
 
   @Test
-  public void testEmptyString() {
+  public void testEmptyString() throws JsonProcessingException {
     assertEquals(3.14, jsonLogic.apply("{\"var\": \"\"}", 3.14));
   }
 
   @Test
-  public void testMapAccess() {
+  public void testMapAccess() throws JsonProcessingException {
     Map<String, Double> data = new HashMap<String, Double>() {{
       put("pi", 3.14);
     }};
@@ -31,19 +32,19 @@ public class VariableTests {
   }
 
   @Test
-  public void testDefaultValue() {
+  public void testDefaultValue() throws JsonProcessingException {
     assertEquals(3.14, jsonLogic.apply("{\"var\": [\"pi\", 3.14]}", null));
   }
 
   @Test
-  public void testUndefined() {
+  public void testUndefined() throws JsonProcessingException {
     assertNull(jsonLogic.apply("{\"var\": [\"pi\"]}", null));
     assertNull(jsonLogic.apply("{\"var\": \"\"}", null));
     assertNull(jsonLogic.apply("{\"var\": 0}", null));
   }
 
   @Test
-  public void testArrayAccess() {
+  public void testArrayAccess() throws JsonProcessingException {
     String[] data = new String[] {"hello", "world"};
 
     assertEquals("hello", jsonLogic.apply("{\"var\": 0}", data));
@@ -53,7 +54,7 @@ public class VariableTests {
   }
 
   @Test
-  public void testArrayAccessWithStringKeys() {
+  public void testArrayAccessWithStringKeys() throws JsonProcessingException {
     String[] data = new String[] {"hello", "world"};
 
     assertEquals("hello", jsonLogic.apply("{\"var\": \"0\"}", data));
@@ -63,7 +64,7 @@ public class VariableTests {
   }
 
   @Test
-  public void testListAccess() {
+  public void testListAccess() throws JsonProcessingException {
     List<String> data = Arrays.asList("hello", "world");
 
     assertEquals("hello", jsonLogic.apply("{\"var\": 0}", data));
@@ -73,7 +74,7 @@ public class VariableTests {
   }
 
   @Test
-  public void testListAccessWithStringKeys() {
+  public void testListAccessWithStringKeys() throws JsonProcessingException {
     List<String> data = Arrays.asList("hello", "world");
 
     assertEquals("hello", jsonLogic.apply("{\"var\": \"0\"}", data));
@@ -83,7 +84,7 @@ public class VariableTests {
   }
 
   @Test
-  public void testComplexAccess() {
+  public void testComplexAccess() throws JsonProcessingException {
     Map<String, Object> data = new HashMap<String, Object>() {{
       put("users", Arrays.asList(
         new HashMap<String, Object>() {{
@@ -104,7 +105,7 @@ public class VariableTests {
   }
 
   @Test
-  public void missingNestedMapKey_returnsDefault() {
+  public void missingNestedMapKey_returnsDefault() throws JsonProcessingException {
     // data.a.b is missing -> should use default
     String rule = "{\"var\": [\"a.b.c\", \"fallback\"]}";
     Map<String, Object> data = map("a", map("b", new HashMap<>()));
@@ -115,7 +116,7 @@ public class VariableTests {
   }
 
   @Test
-  public void arrayIndexWithinBounds_returnsElement_asDoubleForNumbers() {
+  public void arrayIndexWithinBounds_returnsElement_asDoubleForNumbers() throws JsonProcessingException {
     // items.1 exists -> should return 20 (as a double per evaluator.transform)
     String rule = "{\"var\": [\"items.1\", 999]}";
     Map<String, Object> data = map("items", Arrays.asList(10, 20));
@@ -127,7 +128,7 @@ public class VariableTests {
   }
 
   @Test
-  public void arrayIndexOutOfBounds_returnsDefault() {
+  public void arrayIndexOutOfBounds_returnsDefault() throws JsonProcessingException {
     // items.2 missing -> use default
     String rule = "{\"var\": [\"items.2\", \"missing\"]}";
     Map<String, Object> data = map("items", Arrays.asList(10, 20));
@@ -138,7 +139,7 @@ public class VariableTests {
   }
 
   @Test
-  public void topLevelNumericIndex_overList_works() {
+  public void topLevelNumericIndex_overList_works() throws JsonProcessingException {
     // {"var": [1, "missing"]} over a top-level list -> "banana"
     String rule = "{\"var\": [1, \"missing\"]}";
     List<String> data = Arrays.asList("apple", "banana", "carrot");
@@ -149,7 +150,7 @@ public class VariableTests {
   }
 
   @Test
-  public void emptyVarKey_returnsWholeDataObject() {
+  public void emptyVarKey_returnsWholeDataObject() throws JsonProcessingException {
     // {"var": ""} should return the entire data object (same instance)
     String rule = "{\"var\": \"\"}";
     Map<String, Object> data = map("x", 1);
