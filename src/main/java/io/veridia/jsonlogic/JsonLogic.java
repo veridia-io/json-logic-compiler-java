@@ -1,12 +1,11 @@
 package io.veridia.jsonlogic;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.hash.Hashing;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -23,7 +22,7 @@ public class JsonLogic {
                 .build();
     }
 
-    public Object apply(String str, Object ctx) throws JsonProcessingException {
+    public Object apply(String str, Object ctx) {
         String key = Hashing.murmur3_128().hashString(str, UTF_8).toString();
         CompiledExpression expr = compiledExpressionsCache.getIfPresent(key);
 

@@ -1,6 +1,5 @@
 package io.veridia.jsonlogic;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -9,7 +8,7 @@ public class NumericComparisonExpressionTests {
   private static final JsonLogic jsonLogic = new JsonLogic();
 
   @Test
-  public void testLessThan() throws JsonProcessingException {
+  public void testLessThan() {
     String json = "{\"<\" : [1, 2]}";
     Object result = jsonLogic.apply(json, null);
 
@@ -17,7 +16,7 @@ public class NumericComparisonExpressionTests {
   }
 
   @Test
-  public void testLessThanOrEqual() throws JsonProcessingException {
+  public void testLessThanOrEqual() {
     String json = "{\"<=\" : [1, 1]}";
     Object result = jsonLogic.apply(json, null);
 
@@ -25,7 +24,7 @@ public class NumericComparisonExpressionTests {
   }
 
   @Test
-  public void testGreaterThan() throws JsonProcessingException {
+  public void testGreaterThan() {
     String json = "{\">\" : [2, 1]}";
     Object result = jsonLogic.apply(json, null);
 
@@ -33,7 +32,7 @@ public class NumericComparisonExpressionTests {
   }
 
   @Test
-  public void testGreaterThanOrEqual() throws JsonProcessingException {
+  public void testGreaterThanOrEqual() {
     String json = "{\">=\" : [1, 1]}";
     Object result = jsonLogic.apply(json, null);
 
@@ -41,7 +40,7 @@ public class NumericComparisonExpressionTests {
   }
 
   @Test
-  public void testBetweenExclusive() throws JsonProcessingException {
+  public void testBetweenExclusive() {
     String json = "{\"<\" : [1, 2, 3]}";
     Object result = jsonLogic.apply(json, null);
 
@@ -49,7 +48,7 @@ public class NumericComparisonExpressionTests {
   }
 
   @Test
-  public void testBetweenInclusive() throws JsonProcessingException {
+  public void testBetweenInclusive() {
     String json = "{\"<=\" : [1, 1, 3]}";
     Object result = jsonLogic.apply(json, null);
 
@@ -57,7 +56,7 @@ public class NumericComparisonExpressionTests {
   }
 
   @Test
-  public void testGtBetweenExclusive() throws JsonProcessingException {
+  public void testGtBetweenExclusive() {
     String json = "{\">\" : [3, 2, 1]}";
     Object result = jsonLogic.apply(json, null);
 
@@ -65,7 +64,7 @@ public class NumericComparisonExpressionTests {
   }
 
   @Test
-  public void testGtBetweenInclusive() throws JsonProcessingException {
+  public void testGtBetweenInclusive() {
     String json = "{\">=\" : [3, 1, 1]}";
     Object result = jsonLogic.apply(json, null);
 
@@ -73,7 +72,7 @@ public class NumericComparisonExpressionTests {
   }
 
   @Test
-  public void testEdgeCases() throws JsonProcessingException {
+  public void testEdgeCases() {
     assertEquals(true, jsonLogic.apply("{\">=\" : [3, 1, 1, 1]}", null));
     assertEquals(false, jsonLogic.apply("{\">=\" : [3, 1, 3, 1]}", null));
   }
