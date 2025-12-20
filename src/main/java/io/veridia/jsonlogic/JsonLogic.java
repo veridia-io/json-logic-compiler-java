@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.hash.Hashing;
+import io.veridia.jsonlogic.helpers.ToBoolean;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -38,5 +39,11 @@ public class JsonLogic {
         Object context = ctx == null ? null : ctx instanceof String ? mapper.readValue((String) ctx, new TypeReference<>() {}) : ctx;
 
         return expr.eval(context);
+    }
+
+    public boolean check(String str, Object ctx) throws JsonProcessingException {
+        Object result = apply(str, ctx);
+
+        return ToBoolean.eval(result);
     }
 }
