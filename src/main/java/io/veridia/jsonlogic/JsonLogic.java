@@ -25,6 +25,9 @@ public class JsonLogic {
     }
 
     public Object apply(String str, Object ctx) throws JsonProcessingException {
+        if (str == null || str.isBlank())
+            return null;
+
         String key = Hashing.murmur3_128().hashString(str, UTF_8).toString();
         CompiledExpression expr = compiledExpressionsCache.getIfPresent(key);
 
