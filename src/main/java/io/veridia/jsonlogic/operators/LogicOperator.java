@@ -22,13 +22,15 @@ public class LogicOperator implements Operator {
 
     public CompiledExpression compile(List<CompiledExpression> args) {
         return ctx -> {
+            boolean result = true;
+
             for (CompiledExpression a : args) {
-                boolean result = ToBoolean.eval(a.eval(ctx));
+                result = ToBoolean.eval(a.eval(ctx));
 
                 if ((isAnd && !result) || (!isAnd && result)) return result;
             }
 
-            return true;
+            return result;
         };
     }
 }
