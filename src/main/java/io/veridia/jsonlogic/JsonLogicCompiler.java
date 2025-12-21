@@ -59,6 +59,7 @@ public class JsonLogicCompiler {
         registry.register(MathOperator.MODULO);
         registry.register(MathOperator.MIN);
         registry.register(MathOperator.MAX);
+        registry.register(RoundOperator.INSTANCE);
 
         registry.register(AllOperator.INSTANCE);
         registry.register(ArrayHasOperator.SOME);
