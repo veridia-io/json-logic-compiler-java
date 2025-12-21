@@ -49,4 +49,10 @@ public class JsonLogic {
 
         return ToBoolean.eval(result);
     }
+
+    public JsonLogic registerOperator(Operator impl) {
+        compiler.registerOperator(impl);
+
+        return this;
+    }
 }

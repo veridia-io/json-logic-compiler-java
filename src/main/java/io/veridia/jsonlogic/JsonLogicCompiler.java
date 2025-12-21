@@ -66,4 +66,8 @@ public class JsonLogicCompiler {
 
         registry.register(InOperator.INSTANCE);
     }
+
+    public void registerOperator(Operator impl) {
+        registry.register(impl);
+    }
 }
