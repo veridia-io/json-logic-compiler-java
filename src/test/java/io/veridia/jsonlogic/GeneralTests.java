@@ -1,10 +1,8 @@
 package io.veridia.jsonlogic;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import io.veridia.jsonlogic.helpers.ToBoolean;
 import org.junit.Test;
 
-import java.util.Collections;
 import java.util.Map;
 
 import static org.junit.Assert.*;
