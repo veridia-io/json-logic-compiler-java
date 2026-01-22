@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.Test;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
@@ -86,6 +87,37 @@ public class PresenceExpressionTests {
 
         Map<String, Object> ctx = new HashMap<>();
         ctx.put("request", request);
+
+        Object result = jsonLogic.apply(json, ctx);
+
+        assertEquals(false, result);
+    }
+
+    @Test
+    public void testExistsArrayIndex() throws JsonProcessingException {
+        String json = "{ \"exists\": { \"var\": \"items.0.id\" } }";
+
+        Object ctx = Map.of(
+                "items", List.of(
+                        Map.of("id", 123),
+                        Map.of("id", 456)
+                )
+        );
+
+        Object result = jsonLogic.apply(json, ctx);
+
+        assertEquals(true, result);
+    }
+
+    @Test
+    public void testExistsArrayIndexOutOfBounds() throws JsonProcessingException {
+        String json = "{ \"exists\": { \"var\": \"items.2.id\" } }";
+
+        Object ctx = Map.of(
+                "items", List.of(
+                        Map.of("id", 123)
+                )
+        );
 
         Object result = jsonLogic.apply(json, ctx);
 
