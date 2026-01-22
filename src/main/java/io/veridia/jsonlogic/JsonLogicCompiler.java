@@ -69,6 +69,11 @@ public class JsonLogicCompiler {
         registry.register(ArrayHasOperator.NONE);
 
         registry.register(InOperator.INSTANCE);
+
+        registry.register(StringOperator.CONTAINS);
+        registry.register(StringOperator.STARTS_WITH);
+        registry.register(StringOperator.ENDS_WITH);
+        registry.register(StringOperator.REGEX_MATCH);
     }
 
     public void registerOperator(Operator impl) {
