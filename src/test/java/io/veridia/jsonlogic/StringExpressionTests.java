@@ -3,6 +3,8 @@ package io.veridia.jsonlogic;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.Test;
 
+import java.util.Map;
+
 import static org.junit.Assert.assertEquals;
 
 public class StringExpressionTests {
@@ -153,5 +155,89 @@ public class StringExpressionTests {
         Object result = jsonLogic.apply(json, null);
 
         assertEquals(false, result);
+    }
+
+    @Test
+    public void testContainsEmptySubstring() throws JsonProcessingException {
+        Object result = jsonLogic.apply(
+                "{\"contains\": [\"abc\", \"\"]}", null
+        );
+
+        assertEquals(true, result);
+    }
+
+    @Test
+    public void testStartsWithEmptyPrefix() throws JsonProcessingException {
+        Object result = jsonLogic.apply(
+                "{\"starts_with\": [\"abc\", \"\"]}", null
+        );
+
+        assertEquals(true, result);
+    }
+
+    @Test
+    public void testContainsOnEmptyString() throws JsonProcessingException {
+        Object result = jsonLogic.apply(
+                "{\"contains\": [\"\", \"a\"]}", null
+        );
+
+        assertEquals(false, result);
+    }
+
+    @Test
+    public void testRegexEmptyInput() throws JsonProcessingException {
+        Object result = jsonLogic.apply(
+                "{\"regex_match\": [\"\", \".*\"]}", null
+        );
+
+        assertEquals(true, result);
+    }
+
+    @Test
+    public void testRegexAnchors() throws JsonProcessingException {
+        Object result = jsonLogic.apply(
+                "{\"regex_match\": [\"/pricing\", \"^/pricing$\"]}", null
+        );
+
+        assertEquals(true, result);
+    }
+
+    @Test
+    public void testContainsUnicode() throws JsonProcessingException {
+        Object result = jsonLogic.apply(
+                "{\"contains\": [\"привет мир\", \"мир\"]}", null
+        );
+
+        assertEquals(true, result);
+    }
+
+    @Test
+    public void testContainsWithContextVariable() throws JsonProcessingException {
+        String json = "{ \"contains\": [ {\"var\": \"request.path\"}, \"/pricing\" ] }";
+
+        Object context = Map.of(
+                "request", Map.of(
+                        "path", "/pricing/plans"
+                )
+        );
+
+        Object result = jsonLogic.apply(json, context);
+
+        assertEquals(true, result);
+    }
+
+    @Test
+    public void testRegexWithContextVariable() throws JsonProcessingException {
+        String json = "{ \"regex_match\": [ {\"var\": \"referrer.host\"}, \"google\\\\.com$\" ] }";
+
+        Object context = Map.of(
+                "referrer", Map.of(
+                        "host", "www.google.com"
+                )
+        );
+
+        Object result = jsonLogic.apply(json, context);
+
+        assertEquals(true, result);
     }
 }
