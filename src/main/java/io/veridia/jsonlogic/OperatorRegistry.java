@@ -1,10 +1,10 @@
 package io.veridia.jsonlogic;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class OperatorRegistry {
-    private final Map<String, Operator> ops = new HashMap<>();
+    private final Map<String, Operator> ops = new ConcurrentHashMap<>();
 
     public void register(Operator impl) {
         ops.put(impl.key(), impl);
