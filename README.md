@@ -146,9 +146,23 @@ Compiled once → evaluated repeatedly in microseconds.
 
 ## License & Upstream Attribution
 
-This work is **heavily inspired** by
-[https://github.com/jamsesso/json-logic-java](https://github.com/jamsesso/json-logic-java)
-but is not a fork, and diverges significantly from JSON-Logic specification.
+This project is released under the MIT License (see [LICENSE](LICENSE)). It is
+**influenced by**
+[json-logic-java](https://github.com/jamsesso/json-logic-java) and is not a fork;
+it diverges significantly from the JSON-Logic specification.
+
+### Original vs. Derived
+
+- **Original work**: All compiler architecture, operators, and execution model
+  in this repository are original unless explicitly noted otherwise. See
+  [NOTICE.md](NOTICE.md) for the authoritative list.
+- **Derived work**: Portions of the truthiness implementation in
+  `src/main/java/io/veridia/jsonlogic/helpers/ToBoolean.java` are derived from
+  json-logic-java and remain under the upstream MIT license. Additionally, some
+  files in the test suite under `src/test/java/io/veridia/jsonlogic/` are adapted from json-logic-java for
+  project-specific use cases.
+
+Upstream license: https://github.com/jamsesso/json-logic-java/blob/49995a742d1b8e1e62416b16e29ae42156278439/LICENSE
 
 Where applicable, behavior aligns with JSON-Logic 2.0 semantics, except where
 modifications improve determinism, clarity, performance, or match our engine

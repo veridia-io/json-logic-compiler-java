@@ -1,3 +1,9 @@
+/*
+ * Derived from json-logic-java (MIT License):
+ * https://github.com/jamsesso/json-logic-java
+ *
+ * See NOTICE.md for details.
+ */
 package io.veridia.jsonlogic.helpers;
 
 import java.lang.reflect.Array;
