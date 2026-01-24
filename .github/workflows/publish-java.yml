@@ -24,6 +24,14 @@ jobs:
           server-password: MAVEN_CENTRAL_PASSWORD
           gpg-private-key: ${{ secrets.MAVEN_CENTRAL_GPG_PRIV_KEY }}
           gpg-passphrase: MAVEN_CENTRAL_GPG_PASSPHRASE
+      - name: Create Maven security settings
+        run: |
+          mkdir -p ~/.m2
+          cat > ~/.m2/settings-security.xml <<EOF
+          <settingsSecurity>
+            <master></master>
+          </settingsSecurity>
+          EOF
       - name: Set release version
         if: github.event_name == 'release'
         run: |
