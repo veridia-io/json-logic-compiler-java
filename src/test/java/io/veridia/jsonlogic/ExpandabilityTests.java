@@ -14,10 +14,12 @@ import static org.junit.Assert.assertEquals;
 
 public class ExpandabilityTests {
   public static class AssignGroupOperator implements Operator {
+    @Override
     public String key() {
       return "assignGroup";
     }
 
+    @Override
     @SuppressWarnings("unchecked")
     public CompiledExpression compile(List<CompiledExpression> args) {
       if (args.size() != 2) return ctx -> 1L;
