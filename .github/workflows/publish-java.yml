@@ -24,6 +24,10 @@ jobs:
           server-password: MAVEN_CENTRAL_PASSWORD
           gpg-private-key: ${{ secrets.MAVEN_CENTRAL_GPG_PRIV_KEY }}
           gpg-passphrase: MAVEN_CENTRAL_GPG_PASSPHRASE
+      - name: Inspect Maven settings (debug)
+        run: |
+          echo "===== settings.xml ====="
+          cat ~/.m2/settings.xml
       - name: Create Maven security settings
         run: |
           mkdir -p ~/.m2
