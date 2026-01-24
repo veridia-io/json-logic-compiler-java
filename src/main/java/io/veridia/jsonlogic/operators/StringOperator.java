@@ -29,10 +29,12 @@ public class StringOperator implements Operator {
         this.reducer = reducer;
     }
 
+    @Override
     public String key() {
         return op;
     }
 
+    @Override
     public CompiledExpression compile(List<CompiledExpression> args) {
         if (args.size() != 2)
             return ctx -> false;

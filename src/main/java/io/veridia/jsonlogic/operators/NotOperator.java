@@ -15,10 +15,12 @@ public class NotOperator implements Operator {
         this.isDoubleNot = isDoubleNot;
     }
 
+    @Override
     public String key() {
         return isDoubleNot ? "!!" : "!";
     }
 
+    @Override
     public CompiledExpression compile(List<CompiledExpression> args) {
         if (args.isEmpty()) return ctx -> !isDoubleNot;
 

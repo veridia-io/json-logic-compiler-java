@@ -18,10 +18,12 @@ public class NumericComparisonOperator implements Operator {
         this.op = op;
     }
 
+    @Override
     public String key() {
         return op;
     }
 
+    @Override
     public CompiledExpression compile(List<CompiledExpression> args) {
         return ctx -> {
             // JSON-Logic requires at least 2 arguments for comparison

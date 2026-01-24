@@ -16,10 +16,12 @@ public class LogicOperator implements Operator {
         this.isAnd = isAnd;
     }
 
+    @Override
     public String key() {
         return isAnd ? "and" : "or";
     }
 
+    @Override
     public CompiledExpression compile(List<CompiledExpression> args) {
         return ctx -> {
             boolean result = true;

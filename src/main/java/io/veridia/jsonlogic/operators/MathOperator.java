@@ -25,10 +25,12 @@ public class MathOperator implements Operator {
         this.reducer = reducer;
     }
 
+    @Override
     public String key() {
         return op;
     }
 
+    @Override
     public CompiledExpression compile(List<CompiledExpression> args) {
         return ctx -> {
             Double[] values = args.stream().map(element -> ToDouble.eval(element.eval(ctx))).toArray(Double[]::new);

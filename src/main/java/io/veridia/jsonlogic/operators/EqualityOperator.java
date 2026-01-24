@@ -9,10 +9,12 @@ import java.util.List;
 public class EqualityOperator implements Operator {
     public static final EqualityOperator INSTANCE = new EqualityOperator();
 
+    @Override
     public String key() {
         return "==";
     }
 
+    @Override
     public CompiledExpression compile(List<CompiledExpression> args) {
         return ctx -> {
             Object left = args.get(0).eval(ctx);

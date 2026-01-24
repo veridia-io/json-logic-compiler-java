@@ -10,10 +10,12 @@ public class InequalityOperator implements Operator {
 
     private static final EqualityOperator delegate = new EqualityOperator();
 
+    @Override
     public String key() {
         return "!=";
     }
 
+    @Override
     public CompiledExpression compile(List<CompiledExpression> args) {
         CompiledExpression compiledEquality = delegate.compile(args);
 
