@@ -20,6 +20,31 @@ It is an optimized, opinionated subset tailored for real-time decision systems.
 
 ---
 
+## Installation
+
+### Maven
+
+```xml
+<properties>
+  <json-logic-compiler-java.version>1.0.23</json-logic-compiler-java.version>
+</properties>
+
+<dependency>
+  <groupId>io.veridia</groupId>
+  <artifactId>json-logic-compiler-java</artifactId>
+  <version>${json-logic-compiler-java.version}</version>
+</dependency>
+```
+
+### Gradle
+
+```kotlin
+val jsonLogicCompilerVersion = "1.0.23"
+implementation("io.veridia:json-logic-compiler-java:$jsonLogicCompilerVersion")
+```
+
+---
+
 ## Goals
 
 - Extremely fast evaluation suitable for millions of rule executions per second.
