@@ -128,6 +128,7 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <passphrase>${env.MAVEN_CENTRAL_GPG_PASSPHRASE}</passphrase>
                     <useAgent>false</useAgent>
                     <gpgArguments>
                         <arg>--batch</arg>
