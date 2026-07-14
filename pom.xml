@@ -40,6 +40,11 @@
         <target.java.version>11</target.java.version>
         <maven.compiler.source>${target.java.version}</maven.compiler.source>
         <maven.compiler.target>${target.java.version}</maven.compiler.target>
+        <jmh.version>1.37</jmh.version>
+        <!-- Benchmark launcher main class; override with -Dbenchmark.main=...ComparisonBenchmark -->
+        <benchmark.main>io.veridia.jsonlogic.benchmark.JsonLogicBenchmark</benchmark.main>
+        <!-- JMH flags/selector passed to the launcher; override with -Dbenchmark.args="JsonLogicBenchmark -f 1 -i 3" -->
+        <benchmark.args>JsonLogicBenchmark</benchmark.args>
     </properties>
 
     <dependencies>
@@ -84,6 +89,20 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-nop</artifactId>
             <version>2.0.17</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- JMH microbenchmark harness (test scope; benchmarks live under src/test/java). -->
+        <dependency>
+            <groupId>org.openjdk.jmh</groupId>
+            <artifactId>jmh-core</artifactId>
+            <version>${jmh.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.openjdk.jmh</groupId>
+            <artifactId>jmh-generator-annprocess</artifactId>
+            <version>${jmh.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -149,4 +168,53 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <!--
+          Benchmarks are opt-in so they never slow down a normal build:
+            mvn -Pbenchmark test-compile exec:exec
+          Pass JMH flags through:
+            mvn -Pbenchmark test-compile exec:exec -Dbenchmark.args="JsonLogicBenchmark -f 1 -wi 3 -i 5"
+          This profile wires JMH's annotation processor (to generate the benchmark metadata)
+          and runs the JMH launcher in a real forked JVM (exec:exec) so JMH's per-benchmark
+          forks inherit the correct classpath.
+        -->
+        <profile>
+            <id>benchmark</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <version>3.13.0</version>
+                        <configuration>
+                            <annotationProcessorPaths>
+                                <path>
+                                    <groupId>org.openjdk.jmh</groupId>
+                                    <artifactId>jmh-generator-annprocess</artifactId>
+                                    <version>${jmh.version}</version>
+                                </path>
+                            </annotationProcessorPaths>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>3.5.0</version>
+                        <configuration>
+                            <executable>java</executable>
+                            <classpathScope>test</classpathScope>
+                            <arguments>
+                                <argument>-classpath</argument>
+                                <classpath/>
+                                <argument>${benchmark.main}</argument>
+                                <!-- Extra JMH CLI args, e.g. -Dbenchmark.args="JsonLogicBenchmark -f 1 -i 3" -->
+                                <argument>${benchmark.args}</argument>
+                            </arguments>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

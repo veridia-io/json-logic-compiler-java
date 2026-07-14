@@ -29,7 +29,7 @@ public class EqualityOperator implements Operator {
 
             // Check numeric loose equality
             if (left instanceof Number && right instanceof Number) {
-                return Double.valueOf(((Number) left).doubleValue()).equals(((Number) right).doubleValue());
+                return ((Number) left).doubleValue() == ((Number) right).doubleValue();
             }
 
             if (left instanceof Number && right instanceof String) {
@@ -72,7 +72,7 @@ public class EqualityOperator implements Operator {
 
     private boolean compareNumberToString(Number left, String right) {
         try {
-            if (right.trim().isEmpty()) {
+            if (right.isBlank()) {
                 right = "0";
             }
 

@@ -6,10 +6,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.hash.Hashing;
 import io.veridia.jsonlogic.helpers.ToBoolean;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * Entry point for evaluating JSON Logic expressions.
@@ -44,20 +41,39 @@ public class JsonLogic {
         if (str == null || str.isBlank())
             return null;
 
-        String key = Hashing.murmur3_128().hashString(str, UTF_8).toString();
-        CompiledExpression expr = compiledExpressionsCache.getIfPresent(key);
-
-        if (expr == null) {
-            JsonNode json = mapper.readTree(str);
-
-
-            expr = compiler.compile(parser.parse(json));
-            compiledExpressionsCache.put(key, expr);
-        }
+        CompiledExpression expr = compile(str);
 
         Object context = ctx == null ? null : ctx instanceof String ? mapper.readValue((String) ctx, new TypeReference<>() {}) : ctx;
 
         return expr.eval(context);
+    }
+
+    /**
+     * Parses and compiles a JSON Logic expression, returning a reusable {@link CompiledExpression}.
+     * <p>
+     * Compilation results are cached, so repeated calls with the same expression string are cheap.
+     * Callers on hot paths should compile once and invoke {@link CompiledExpression#eval(Object)}
+     * directly against pre-parsed contexts to avoid all per-evaluation parsing and cache lookups.
+     *
+     * @param str JSON Logic expression as a string
+     * @return the compiled expression (a no-op returning {@code null} for a blank input)
+     * @throws JsonProcessingException when the expression cannot be parsed
+     */
+    public CompiledExpression compile(String str) throws JsonProcessingException {
+        if (str == null || str.isBlank())
+            return ctx -> null;
+
+        // The expression string is the cache key directly: String.hashCode is cached by the JVM,
+        // so lookups no longer pay for hashing the full expression on every call.
+        CompiledExpression expr = compiledExpressionsCache.getIfPresent(str);
+
+        if (expr == null) {
+            JsonNode json = mapper.readTree(str);
+            expr = compiler.compile(parser.parse(json));
+            compiledExpressionsCache.put(str, expr);
+        }
+
+        return expr;
     }
 
     /**

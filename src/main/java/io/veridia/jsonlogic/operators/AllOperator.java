@@ -4,6 +4,7 @@ import io.veridia.jsonlogic.CompiledExpression;
 import io.veridia.jsonlogic.Operator;
 import io.veridia.jsonlogic.helpers.ToBoolean;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -28,9 +29,12 @@ public class AllOperator implements Operator {
             List<?> list = (List<?>) arrObj;
             if (list.isEmpty()) return false;
 
+            // One reusable child context per eval; the element slot is overwritten each iteration
+            // rather than allocating a fresh map per element.
+            Map<String, Object> childCtx = new HashMap<>(2);
             for (Object element : list) {
-                // Create child context with this element as data
-                Object result = condExpr.eval(Map.of("item", element));
+                childCtx.put("item", element);
+                Object result = condExpr.eval(childCtx);
                 if (!ToBoolean.eval(result)) {
                     return false;
                 }

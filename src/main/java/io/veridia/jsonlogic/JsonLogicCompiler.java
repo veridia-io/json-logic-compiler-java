@@ -24,10 +24,28 @@ public class JsonLogicCompiler {
         // var
         if ("var".equals(expr.op)) {
             String var = expr.variable;
-            return ctx -> {
-                Object resolved = PathResolver.resolve(ctx, var);
+            Object def = expr.variableDefault;
 
-                return resolved != null ? resolved : expr.variableDefault;
+            // Whole-context reference: {"var": ""}
+            if (var == null || var.isEmpty()) {
+                return ctx -> ctx != null ? ctx : def;
+            }
+
+            // Pre-split the path once, at compile time, so no regex runs per evaluation.
+            String[] parts = PathResolver.split(var);
+
+            // Flat, dot-free access is the common case — resolve it without touching the array.
+            if (parts.length == 1) {
+                String key = parts[0];
+                return ctx -> {
+                    Object resolved = PathResolver.resolveSingle(ctx, key);
+                    return resolved != null ? resolved : def;
+                };
+            }
+
+            return ctx -> {
+                Object resolved = PathResolver.resolve(ctx, parts);
+                return resolved != null ? resolved : def;
             };
         }
 

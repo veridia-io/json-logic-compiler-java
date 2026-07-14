@@ -23,11 +23,14 @@ public class LogicOperator implements Operator {
 
     @Override
     public CompiledExpression compile(List<CompiledExpression> args) {
+        // Materialize once at compile time: an indexed loop over an array allocates no iterator per eval.
+        CompiledExpression[] a = args.toArray(new CompiledExpression[0]);
+
         return ctx -> {
             boolean result = true;
 
-            for (CompiledExpression a : args) {
-                result = ToBoolean.eval(a.eval(ctx));
+            for (int i = 0; i < a.length; i++) {
+                result = ToBoolean.eval(a[i].eval(ctx));
 
                 if ((isAnd && !result) || (!isAnd && result)) return result;
             }

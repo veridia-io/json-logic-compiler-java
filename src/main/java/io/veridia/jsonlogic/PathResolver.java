@@ -5,12 +5,35 @@ import java.util.Map;
 
 public class PathResolver {
 
-    @SuppressWarnings("unchecked")
+    /**
+     * Splits a dotted variable path into its segments once, at compile time.
+     * Kept out of the eval hot path so callers never pay for regex parsing per evaluation.
+     */
+    public static String[] split(String path) {
+        if (path == null || path.isEmpty()) return new String[0];
+        return path.split("\\.");
+    }
+
+    /**
+     * Resolves a dotted path against a root object.
+     * <p>
+     * Prefer the {@link #resolve(Object, String[])} overload on hot paths: it accepts an
+     * already-split path so no regex splitting happens per evaluation.
+     */
     public static Object resolve(Object root, String path) {
         if (root == null) return null;
         if (path == null || path.isEmpty()) return root;
+        return resolve(root, split(path));
+    }
 
-        String[] parts = path.split("\\.");
+    /**
+     * Resolves a pre-split path against a root object. This is the allocation-free path used
+     * by compiled {@code var} nodes.
+     */
+    @SuppressWarnings("unchecked")
+    public static Object resolve(Object root, String[] parts) {
+        if (root == null) return null;
+        if (parts == null || parts.length == 0) return root;
 
         Object current = root;
 
@@ -25,26 +48,20 @@ public class PathResolver {
 
             // List access (array index)
             if (current instanceof List) {
-                try {
-                    int index = Integer.parseInt(part);
-                    List<?> list = (List<?>) current;
-                    if (index < 0 || index >= list.size()) return null;
-                    current = list.get(index);
-                } catch (NumberFormatException e) {
-                    return null; // invalid index
-                }
+                int index = parseIndex(part);
+                if (index < 0) return null;
+                List<?> list = (List<?>) current;
+                if (index >= list.size()) return null;
+                current = list.get(index);
                 continue;
             }
 
             if (current.getClass().isArray()) {
-                try {
-                    int index = Integer.parseInt(part);
-                    Object[] list = (Object[]) current;
-                    if (index < 0 || index >= list.length) return null;
-                    current = list[index];
-                } catch (NumberFormatException e) {
-                    return null; // invalid index
-                }
+                int index = parseIndex(part);
+                if (index < 0) return null;
+                Object[] list = (Object[]) current;
+                if (index >= list.length) return null;
+                current = list[index];
                 continue;
             }
 
@@ -54,5 +71,50 @@ public class PathResolver {
 
         return current;
     }
-}
 
+    /**
+     * Resolves a single, dot-free key against a root object. Fast path for flat variable access,
+     * which is by far the most common {@code var} shape.
+     */
+    @SuppressWarnings("unchecked")
+    public static Object resolveSingle(Object root, String key) {
+        if (root == null) return null;
+
+        if (root instanceof Map) {
+            return ((Map<String, Object>) root).get(key);
+        }
+
+        if (root instanceof List) {
+            int index = parseIndex(key);
+            if (index < 0) return null;
+            List<?> list = (List<?>) root;
+            return index < list.size() ? list.get(index) : null;
+        }
+
+        if (root.getClass().isArray()) {
+            int index = parseIndex(key);
+            if (index < 0) return null;
+            Object[] list = (Object[]) root;
+            return index < list.length ? list[index] : null;
+        }
+
+        return null;
+    }
+
+    /**
+     * Parses a path segment as a non-negative array index without throwing.
+     * Returns {@code -1} for anything that is not a valid non-negative integer.
+     */
+    private static int parseIndex(String part) {
+        if (part.isEmpty()) return -1;
+        int value = 0;
+        for (int i = 0; i < part.length(); i++) {
+            char c = part.charAt(i);
+            if (c < '0' || c > '9') return -1;
+            int digit = c - '0';
+            if (value > (Integer.MAX_VALUE - digit) / 10) return -1; // would overflow
+            value = value * 10 + digit;
+        }
+        return value;
+    }
+}
