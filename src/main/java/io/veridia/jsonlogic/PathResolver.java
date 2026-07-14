@@ -111,8 +111,9 @@ public class PathResolver {
         for (int i = 0; i < part.length(); i++) {
             char c = part.charAt(i);
             if (c < '0' || c > '9') return -1;
-            value = value * 10 + (c - '0');
-            if (value < 0) return -1; // overflow
+            int digit = c - '0';
+            if (value > (Integer.MAX_VALUE - digit) / 10) return -1; // would overflow
+            value = value * 10 + digit;
         }
         return value;
     }
