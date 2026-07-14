@@ -11,7 +11,7 @@ public class ToDouble {
         if (o instanceof String) {
             String s = (String) o;
             try {
-                if (s.trim().isEmpty()) {
+                if (s.isBlank()) {
                     s = "0";
                 }
 

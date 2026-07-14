@@ -5,8 +5,7 @@ import io.veridia.jsonlogic.Operator;
 import io.veridia.jsonlogic.helpers.ToDouble;
 
 import java.util.List;
-import java.util.Objects;
-import java.util.function.BiFunction;
+import java.util.function.DoubleBinaryOperator;
 
 public class MathOperator implements Operator {
     public static final MathOperator ADD = new MathOperator("+", Double::sum);
@@ -18,10 +17,15 @@ public class MathOperator implements Operator {
     public static final MathOperator MAX = new MathOperator("max", Math::max);
 
     private final String op;
-    private final BiFunction<Double, Double, Double> reducer;
+    private final boolean isSubtract;
+    private final boolean isDivide;
+    // Primitive reducer — no autoboxing of intermediate results on the eval hot path.
+    private final DoubleBinaryOperator reducer;
 
-    MathOperator(String op, BiFunction<Double, Double, Double> reducer) {
+    MathOperator(String op, DoubleBinaryOperator reducer) {
         this.op = op;
+        this.isSubtract = op.equals("-");
+        this.isDivide = op.equals("/");
         this.reducer = reducer;
     }
 
@@ -32,25 +36,24 @@ public class MathOperator implements Operator {
 
     @Override
     public CompiledExpression compile(List<CompiledExpression> args) {
-        return ctx -> {
-            Double[] values = args.stream().map(element -> ToDouble.eval(element.eval(ctx))).toArray(Double[]::new);
-            if (values.length == 1) {
-                if (op.equals("-")) {
-                    return -values[0];
-                }
+        // Materialize args once at compile time: indexed array, no per-eval iterator or stream.
+        CompiledExpression[] a = args.toArray(new CompiledExpression[0]);
 
-                if (op.equals("/")) {
-                    return null;
-                }
+        return ctx -> {
+            double first = ToDouble.eval(a[0].eval(ctx));
+
+            if (a.length == 1) {
+                if (isSubtract) return -first;
+                if (isDivide) return null;
+                return first;
             }
 
-            if (Objects.equals(op, "/") && values[1] == 0.0)
-                return 0.0;
+            double second = ToDouble.eval(a[1].eval(ctx));
+            if (isDivide && second == 0.0) return 0.0;
 
-            double accumulator = values[0];
-
-            for (int i = 1; i < values.length; i++) {
-                accumulator = reducer.apply(accumulator, values[i]);
+            double accumulator = reducer.applyAsDouble(first, second);
+            for (int i = 2; i < a.length; i++) {
+                accumulator = reducer.applyAsDouble(accumulator, ToDouble.eval(a[i].eval(ctx)));
             }
 
             return accumulator;
