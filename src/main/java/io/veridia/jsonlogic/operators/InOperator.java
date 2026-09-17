@@ -39,6 +39,20 @@ public class InOperator implements Operator {
             // Case 2: container is a LIST → membership test
             if (container instanceof List) {
                 List<?> list = (List<?>) container;
+
+                // Numeric loose equality, matching EqualityOperator: a Long needle (any
+                // operator's result, e.g. date_diff) must match an Integer literal element (how
+                // Jackson parses a small JSON int) — plain List.contains() uses raw equals() and
+                // Long(2).equals(Integer(2)) is false, so a same-typed check alone would miss it.
+                if (needle instanceof Number) {
+                    for (Object item : list) {
+                        if (item instanceof Number && ((Number) needle).doubleValue() == ((Number) item).doubleValue()) {
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+
                 return list.contains(needle);
             }
 
