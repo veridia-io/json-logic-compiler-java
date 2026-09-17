@@ -1,7 +1,13 @@
 # Veridia JSON Logic Compiler
 
-A high-performance JSON-Logic execution engine for Java, designed for real-time
+A high-performance JSON-Logic execution engine for the JVM, designed for real-time
 segmentation, metrics evaluation, and rule processing in the Veridia platform.
+
+Implemented in Scala 3 (circe for JSON), published as a plain JVM jar. The public API
+(`io.veridia.jsonlogic.JsonLogic`/`Operator`/`CompiledExpression`) is unchanged and fully
+usable from Java — `Operator`/`CompiledExpression` are themselves plain Java interfaces, so a
+Java caller can still implement a custom `Operator`, including via a lambda for
+`CompiledExpression`, exactly as before.
 
 This project takes inspiration from the excellent work in  
 https://github.com/jamsesso/json-logic-java,  
