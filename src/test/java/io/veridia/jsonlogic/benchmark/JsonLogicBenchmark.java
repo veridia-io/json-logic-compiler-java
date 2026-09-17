@@ -38,11 +38,15 @@ import java.util.concurrent.TimeUnit;
  *       loop callers should use for millions of executions per second.</li>
  * </ul>
  */
+// Defaults are tuned for a stable number without hand-tuned CLI flags: 1s iterations are prone to
+// double-digit-percent error on this machine (JIT tiering/OS scheduling noise dominates), so the
+// default run trades ~1 minute per benchmark (3 forks x (5 warmup + 10 measurement) x 2s) for a
+// single-digit-percent-or-better error bar. Override with -Dbenchmark.args for a quicker smoke run.
 @BenchmarkMode(Mode.Throughput)
 @OutputTimeUnit(TimeUnit.MICROSECONDS)
-@Warmup(iterations = 5, time = 1)
-@Measurement(iterations = 5, time = 1)
-@Fork(1)
+@Warmup(iterations = 5, time = 2)
+@Measurement(iterations = 10, time = 2)
+@Fork(3)
 @State(Scope.Thread)
 public class JsonLogicBenchmark {
 

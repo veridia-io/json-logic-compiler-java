@@ -30,7 +30,11 @@ final class JsonLogicCompiler:
 
     case Expr.Op(name, args) =>
       val operator = registry.get(name)
-      val compiledArgs: java.util.List[CompiledExpression] = args.map(compile).asJava
+      // A real ArrayList, not `.asJava`'s lazy view over the Scala List (a linked list): several
+      // operators call `args.get(i)` *inside* their per-eval closure (every chained comparison
+      // does), and a SeqWrapper-backed view makes that an O(i) linked-list walk per call instead
+      // of an O(1) array index — this runs once per compile(), never per eval.
+      val compiledArgs: java.util.List[CompiledExpression] = new java.util.ArrayList(args.map(compile).asJava)
       operator.compile(compiledArgs)
 
   private def registerDefaultOperators(): Unit =
