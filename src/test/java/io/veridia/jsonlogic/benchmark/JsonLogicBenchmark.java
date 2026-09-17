@@ -1,6 +1,5 @@
 package io.veridia.jsonlogic.benchmark;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import io.veridia.jsonlogic.CompiledExpression;
 import io.veridia.jsonlogic.JsonLogic;
 import org.openjdk.jmh.annotations.Benchmark;
@@ -63,7 +62,7 @@ public class JsonLogicBenchmark {
     private CompiledExpression some;
 
     @Setup
-    public void setup() throws JsonProcessingException {
+    public void setup() {
         jsonLogic = new JsonLogic();
 
         Map<String, Object> address = new HashMap<>();
@@ -96,7 +95,7 @@ public class JsonLogicBenchmark {
     }
 
     @Benchmark
-    public Object flatVar_apply() throws JsonProcessingException {
+    public Object flatVar_apply() {
         return jsonLogic.apply(FLAT_VAR, context);
     }
 
@@ -106,7 +105,7 @@ public class JsonLogicBenchmark {
     }
 
     @Benchmark
-    public Object deepVar_apply() throws JsonProcessingException {
+    public Object deepVar_apply() {
         return jsonLogic.apply(DEEP_VAR, context);
     }
 
@@ -116,7 +115,7 @@ public class JsonLogicBenchmark {
     }
 
     @Benchmark
-    public Object math_apply() throws JsonProcessingException {
+    public Object math_apply() {
         return jsonLogic.apply(MATH, context);
     }
 
@@ -126,7 +125,7 @@ public class JsonLogicBenchmark {
     }
 
     @Benchmark
-    public Object logic_apply() throws JsonProcessingException {
+    public Object logic_apply() {
         return jsonLogic.apply(LOGIC, context);
     }
 
@@ -136,7 +135,7 @@ public class JsonLogicBenchmark {
     }
 
     @Benchmark
-    public Object some_apply() throws JsonProcessingException {
+    public Object some_apply() {
         return jsonLogic.apply(SOME, context);
     }
 
