@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.Test;
 
 import java.time.Instant;
+import java.time.OffsetDateTime;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -108,7 +109,7 @@ public class DateGeneratorOperatorTests {
     // 14:30 UTC on 2024-03-15 is 23:30 on the same calendar day in Asia/Tokyo (UTC+9, no DST).
     Object result = jsonLogic.apply(
             "{\"date_truncate\": [" + T_2024_03_15_14_30_00Z + ", \"day\", \"Asia/Tokyo\"]}", null);
-    long expected = Instant.parse("2024-03-15T00:00:00+09:00").toEpochMilli();
+    long expected = OffsetDateTime.parse("2024-03-15T00:00:00+09:00").toInstant().toEpochMilli();
     assertEquals(expected, ((Number) result).longValue());
   }
 
