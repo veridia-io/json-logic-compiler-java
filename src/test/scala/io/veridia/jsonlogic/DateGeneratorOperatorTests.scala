@@ -80,7 +80,8 @@ class DateGeneratorOperatorTests extends AnyFunSuite with Matchers:
 
   test("date_truncate: honors an explicit timezone") {
     val result = jsonLogic.apply(s"""{"date_truncate": [$T_2024_03_15_14_30_00Z, "day", "Asia/Tokyo"]}""", null)
-    result.asInstanceOf[Number].longValue() shouldEqual Instant.parse("2024-03-15T00:00:00+09:00").toEpochMilli
+    val expected = java.time.OffsetDateTime.parse("2024-03-15T00:00:00+09:00").toInstant.toEpochMilli
+    result.asInstanceOf[Number].longValue() shouldEqual expected
   }
 
   test("a malformed unit throws IllegalArgumentException at compile time") {
