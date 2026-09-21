@@ -72,4 +72,13 @@ public class InExpressionTests {
   public void testBadSecondArgument() throws JsonProcessingException {
     assertFalse((boolean) jsonLogic.apply("{\"in\": [\"Spring\", 3]}", null));
   }
+
+  @Test
+  public void testCrossNumericTypeMembership() throws JsonProcessingException {
+    // A Long needle (e.g. any operator result, not just a JSON literal) against a container of
+    // JSON int literals (which Jackson parses as Integer) must still match numerically — raw
+    // List.contains() would reject 2L against [1, 2, 3] since Long(2).equals(Integer(2)) is false.
+    Map data = Collections.singletonMap("value", 2L);
+    assertEquals(true, jsonLogic.apply("{\"in\": [{\"var\": \"value\"}, [1, 2, 3]]}", data));
+  }
 }

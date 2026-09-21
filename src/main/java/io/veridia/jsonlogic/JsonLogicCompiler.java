@@ -96,6 +96,18 @@ public class JsonLogicCompiler {
 
         registry.register(PresenceOperator.EXISTS);
         registry.register(PresenceOperator.NOT_EXISTS);
+
+        registry.register(NowOperator.INSTANCE);
+        registry.register(TodayOperator.INSTANCE);
+        registry.register(DateAddOperator.INSTANCE);
+        registry.register(DateTruncateOperator.INSTANCE);
+        registry.register(DateDiffOperator.INSTANCE);
+        registry.register(DateEqOperator.INSTANCE);
+        registry.register(ChronoFieldExtractorOperator.YEAR);
+        registry.register(ChronoFieldExtractorOperator.MONTH);
+        registry.register(ChronoFieldExtractorOperator.DAY);
+        registry.register(ChronoFieldExtractorOperator.HOUR);
+        registry.register(ChronoFieldExtractorOperator.DAY_OF_WEEK);
     }
 
     public void registerOperator(Operator impl) {
