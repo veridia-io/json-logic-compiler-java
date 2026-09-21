@@ -1,6 +1,5 @@
 package io.veridia.jsonlogic.benchmark;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import io.veridia.jsonlogic.CompiledExpression;
 import io.veridia.jsonlogic.JsonLogic;
 import org.openjdk.jmh.annotations.Benchmark;
@@ -39,11 +38,15 @@ import java.util.concurrent.TimeUnit;
  *       loop callers should use for millions of executions per second.</li>
  * </ul>
  */
+// Defaults are tuned for a stable number without hand-tuned CLI flags: 1s iterations are prone to
+// double-digit-percent error on this machine (JIT tiering/OS scheduling noise dominates), so the
+// default run trades ~1 minute per benchmark (3 forks x (5 warmup + 10 measurement) x 2s) for a
+// single-digit-percent-or-better error bar. Override with -Dbenchmark.args for a quicker smoke run.
 @BenchmarkMode(Mode.Throughput)
 @OutputTimeUnit(TimeUnit.MICROSECONDS)
-@Warmup(iterations = 5, time = 1)
-@Measurement(iterations = 5, time = 1)
-@Fork(1)
+@Warmup(iterations = 5, time = 2)
+@Measurement(iterations = 10, time = 2)
+@Fork(3)
 @State(Scope.Thread)
 public class JsonLogicBenchmark {
 
@@ -63,7 +66,7 @@ public class JsonLogicBenchmark {
     private CompiledExpression some;
 
     @Setup
-    public void setup() throws JsonProcessingException {
+    public void setup() {
         jsonLogic = new JsonLogic();
 
         Map<String, Object> address = new HashMap<>();
@@ -96,7 +99,7 @@ public class JsonLogicBenchmark {
     }
 
     @Benchmark
-    public Object flatVar_apply() throws JsonProcessingException {
+    public Object flatVar_apply() {
         return jsonLogic.apply(FLAT_VAR, context);
     }
 
@@ -106,7 +109,7 @@ public class JsonLogicBenchmark {
     }
 
     @Benchmark
-    public Object deepVar_apply() throws JsonProcessingException {
+    public Object deepVar_apply() {
         return jsonLogic.apply(DEEP_VAR, context);
     }
 
@@ -116,7 +119,7 @@ public class JsonLogicBenchmark {
     }
 
     @Benchmark
-    public Object math_apply() throws JsonProcessingException {
+    public Object math_apply() {
         return jsonLogic.apply(MATH, context);
     }
 
@@ -126,7 +129,7 @@ public class JsonLogicBenchmark {
     }
 
     @Benchmark
-    public Object logic_apply() throws JsonProcessingException {
+    public Object logic_apply() {
         return jsonLogic.apply(LOGIC, context);
     }
 
@@ -136,7 +139,7 @@ public class JsonLogicBenchmark {
     }
 
     @Benchmark
-    public Object some_apply() throws JsonProcessingException {
+    public Object some_apply() {
         return jsonLogic.apply(SOME, context);
     }
 

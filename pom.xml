@@ -5,10 +5,10 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.veridia</groupId>
     <artifactId>json-logic-compiler-java</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>2.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>Veridia JSON Logic Compiler</name>
-    <description>A high-performance JSON-Logic execution engine for Java, designed for real-time segmentation, metrics evaluation, and rule processing in the Veridia platform.</description>
+    <description>A high-performance JSON-Logic execution engine for the JVM (Scala 3), designed for real-time segmentation, metrics evaluation, and rule processing in the Veridia platform.</description>
     <url>https://github.com/veridia-io/json-logic-compiler-java</url>
 
     <licenses>
@@ -37,9 +37,16 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <target.java.version>11</target.java.version>
-        <maven.compiler.source>${target.java.version}</maven.compiler.source>
-        <maven.compiler.target>${target.java.version}</maven.compiler.target>
+        <!-- The two Java SPI files (Operator, CompiledExpression) compile against this release too,
+             so scalac and javac agree on the emitted bytecode version. -->
+        <maven.compiler.release>17</maven.compiler.release>
+
+        <scala.binary.version>3</scala.binary.version>
+        <scala.version>3.3.8</scala.version>
+        <circe.version>0.14.16</circe.version>
+        <scalatest.version>3.2.20</scalatest.version>
+        <caffeine.version>3.2.4</caffeine.version>
+
         <jmh.version>1.37</jmh.version>
         <!-- Benchmark launcher main class; override with -Dbenchmark.main=...ComparisonBenchmark -->
         <benchmark.main>io.veridia.jsonlogic.benchmark.JsonLogicBenchmark</benchmark.main>
@@ -49,21 +56,26 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>2.22.1</version>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala3-library_${scala.binary.version}</artifactId>
+            <version>${scala.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>jsr305</artifactId>
-            <version>3.0.2</version>
+            <groupId>io.circe</groupId>
+            <artifactId>circe-core_${scala.binary.version}</artifactId>
+            <version>${circe.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.circe</groupId>
+            <artifactId>circe-parser_${scala.binary.version}</artifactId>
+            <version>${circe.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>33.5.0-jre</version>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+            <version>${caffeine.version}</version>
         </dependency>
 
         <dependency>
@@ -74,15 +86,9 @@
 
         <!-- Dependencies for tests. -->
         <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <version>5.13.1</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.vintage</groupId>
-            <artifactId>junit-vintage-engine</artifactId>
-            <version>5.13.1</version>
+            <groupId>org.scalatest</groupId>
+            <artifactId>scalatest_${scala.binary.version}</artifactId>
+            <version>${scalatest.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -92,7 +98,7 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- JMH microbenchmark harness (test scope; benchmarks live under src/test/java). -->
+        <!-- JMH microbenchmark harness (test scope; benchmark stays Java, under src/test/java). -->
         <dependency>
             <groupId>org.openjdk.jmh</groupId>
             <artifactId>jmh-core</artifactId>
@@ -109,6 +115,72 @@
 
     <build>
         <plugins>
+            <!-- Compiles the two Java SPI files (src/main/java) at the normal `compile` phase, so
+                 their .class files are already on the classpath when scala-maven-plugin runs next. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+            </plugin>
+
+            <plugin>
+                <groupId>net.alchim31.maven</groupId>
+                <artifactId>scala-maven-plugin</artifactId>
+                <version>4.9.10</version>
+                <configuration>
+                    <scalaVersion>${scala.version}</scalaVersion>
+                    <!-- Scoped strictly to Scala sources: left at its mixed-source default, this
+                         plugin silently absorbs src/test/java too (compiling the JMH benchmark
+                         itself via its own internal javac call), which bypasses
+                         maven-compiler-plugin's annotationProcessorPaths entirely — the -Pbenchmark
+                         profile's JMH annotation processor then never runs, and JMH fails at
+                         startup with "Unable to find the resource: /META-INF/BenchmarkList". -->
+                    <sourceDir>src/main/scala</sourceDir>
+                    <testSourceDir>src/test/scala</testSourceDir>
+                    <args>
+                        <arg>-release:17</arg>
+                        <arg>-deprecation</arg>
+                        <arg>-feature</arg>
+                    </args>
+                </configuration>
+                <executions>
+                    <!-- Runs after the default `compile` phase (the Java SPI files above), so scalac
+                         sees Operator.class/CompiledExpression.class already compiled. -->
+                    <execution>
+                        <id>scala-compile</id>
+                        <phase>process-classes</phase>
+                        <goals><goal>compile</goal></goals>
+                    </execution>
+                    <!-- src/test/java (the JMH benchmark) and src/test/scala (ScalaTest suites) both
+                         only depend on already-compiled main classes, not on each other, so ordering
+                         between this and maven-compiler-plugin's default-testCompile doesn't matter. -->
+                    <execution>
+                        <id>scala-test-compile</id>
+                        <phase>process-test-classes</phase>
+                        <goals><goal>testCompile</goal></goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Runs the ported ScalaTest suites under `mvn test`. Surefire is left at its default
+                 binding: with no JUnit-pattern test classes left in src/test/java (only the JMH
+                 benchmark, which surefire's default includes don't match), it finds nothing to run. -->
+            <plugin>
+                <groupId>org.scalatest</groupId>
+                <artifactId>scalatest-maven-plugin</artifactId>
+                <version>2.2.0</version>
+                <configuration>
+                    <reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
+                    <junitxml>.</junitxml>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>scala-test</id>
+                        <goals><goal>test</goal></goals>
+                    </execution>
+                </executions>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
@@ -133,6 +205,8 @@
                 </executions>
                 <configuration>
                     <additionalJOptions>-Xdoclint:none</additionalJOptions>
+                    <!-- javadoc:jar only sees src/main/java by default; the two SPI files there are
+                         self-explanatory, and the Scala sources have no Java-doc surface to publish. -->
                 </configuration>
             </plugin>
             <plugin>
@@ -190,7 +264,9 @@
             mvn -Pbenchmark test-compile exec:exec -Dbenchmark.args="JsonLogicBenchmark -f 1 -wi 3 -i 5"
           This profile wires JMH's annotation processor (to generate the benchmark metadata)
           and runs the JMH launcher in a real forked JVM (exec:exec) so JMH's per-benchmark
-          forks inherit the correct classpath.
+          forks inherit the correct classpath. The benchmark itself stays plain Java
+          (src/test/java) — JMH's annotation-processor-based code generation is safest left on
+          javac, not folded into the Scala test compile.
         -->
         <profile>
             <id>benchmark</id>
@@ -199,7 +275,6 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-compiler-plugin</artifactId>
-                        <version>3.13.0</version>
                         <configuration>
                             <annotationProcessorPaths>
                                 <path>
